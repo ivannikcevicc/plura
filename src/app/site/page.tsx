@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { pricingCards } from "@/lib/constants";
 import clsx from "clsx";
-import { Check, Divide } from "lucide-react";
+import { Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
