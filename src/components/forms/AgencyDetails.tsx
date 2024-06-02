@@ -60,7 +60,7 @@ const FormSchema = z.object({
   address: z.string().min(1),
   city: z.string().min(1),
   zipCode: z.string().min(1),
-  state: z.string().min(1),
+  state: z.string().min(1).optional(),
   country: z.string().min(1),
   agencyLogo: z.string().min(1),
   whiteLabel: z.boolean(),
@@ -71,7 +71,6 @@ const AgencyDetails = ({ data }: Props) => {
   const router = useRouter();
 
   const form = useForm<z.infer<typeof FormSchema>>({
-    mode: "onChange",
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: data?.name,
@@ -135,8 +134,9 @@ const AgencyDetails = ({ data }: Props) => {
       newUserData = await initUser({ role: "AGENCY_OWNER" });
       if (!data?.id) return;
 
-      const response = await upsertAgency({
-        id: data?.id ? data.id : v4(),
+      // const response = await upsertAgency({
+      await upsertAgency({
+        id: data?.id ? data?.id : v4(),
         // customerId: data?.customerId || custId || "",
         address: values.address,
         agencyLogo: values.agencyLogo,
@@ -144,7 +144,7 @@ const AgencyDetails = ({ data }: Props) => {
         companyPhone: values.companyPhone,
         country: values.country,
         name: values.name,
-        state: values.state,
+        state: values.state || "",
         whiteLabel: values.whiteLabel,
         zipCode: values.zipCode,
         createdAt: new Date(),
@@ -156,10 +156,11 @@ const AgencyDetails = ({ data }: Props) => {
       toast({
         title: "Created Agency",
       });
-      if (data?.id) return router.refresh();
-      if (response) {
-        return router.refresh();
-      }
+      // if (data?.id) return router.refresh();
+      // if (response) {
+      //   return router.refresh();
+      // }
+      return router.refresh();
     } catch (error) {
       console.log(error);
       toast({
@@ -235,7 +236,7 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Agency Name</FormLabel>
                       <FormControl>
-                        <Input {...form} placeholder="Your agency name" />
+                        <Input {...field} placeholder="Your agency name" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -249,7 +250,7 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Agency Email</FormLabel>
                       <FormControl>
-                        <Input {...form} placeholder="Your agency email" />
+                        <Input {...field} placeholder="Your agency email" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -265,7 +266,7 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Agency Phone Number</FormLabel>
                       <FormControl>
-                        <Input {...form} placeholder="Phone" />
+                        <Input {...field} placeholder="Phone" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -307,7 +308,7 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Address</FormLabel>
                       <FormControl>
-                        <Input {...form} placeholder="123 st..." />
+                        <Input {...field} placeholder="123 st..." />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -323,7 +324,7 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>City</FormLabel>
                       <FormControl>
-                        <Input {...form} placeholder="City" />
+                        <Input {...field} placeholder="City" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -337,7 +338,7 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>State</FormLabel>
                       <FormControl>
-                        <Input {...form} placeholder="State" />
+                        <Input {...field} placeholder="State" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -351,7 +352,7 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Zip Code</FormLabel>
                       <FormControl>
-                        <Input {...form} placeholder="Zip Code" />
+                        <Input {...field} placeholder="Zip Code" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -367,7 +368,7 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Country</FormLabel>
                       <FormControl>
-                        <Input {...form} placeholder="Country" />
+                        <Input {...field} placeholder="Country" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
