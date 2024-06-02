@@ -10,5 +10,8 @@ const nextConfig = {
     ],
   },
   reactStrictMode: false,
+  experimental: {
+    appDir: true, // Enable experimental app directory support
+  },
 };
 export default nextConfig;

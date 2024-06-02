@@ -11,10 +11,10 @@ const Page = async ({
   searchParams: { plan: Plan; state: string; code: string };
 }) => {
   const agencyId = await verifyAndAcceptInvitation();
-  console.log(agencyId);
 
-  //get the users details
+  // Get the user's details
   const user = await getAuthUserDetails();
+
   if (agencyId) {
     if (user?.role === "SUBACCOUNT_GUEST" || user?.role === "SUBACCOUNT_USER") {
       return redirect("/subaccount");
@@ -31,11 +31,14 @@ const Page = async ({
         return redirect(
           `/agency/${stateAgencyId}/${statePath}?code=${searchParams.code}`
         );
-      } else return redirect(`/agency/${agencyId}`);
+      } else {
+        return redirect(`/agency/${agencyId}`);
+      }
     } else {
       return <div>Not authorized</div>;
     }
   }
+
   const authUser = await currentUser();
   return (
     <div className="flex justify-center items-center mt-4">
