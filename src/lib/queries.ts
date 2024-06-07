@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { Agency, Plan, SubAccount, User } from "@prisma/client";
 import { AArrowDown } from "lucide-react";
 import { isNull } from "util";
-import { v4 } from "uuid";
+import ObjectId from "bson-objectid";
 
 export const getAuthUserDetails = async () => {
   const user = await currentUser();
@@ -302,7 +302,7 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
     },
   });
   if (!agencyOwner) return console.log("🔴Error could not create subaccount");
-  const permissionId = v4();
+  const permissionId = new ObjectId().toHexString();
   const response = await db.subAccount.upsert({
     where: { id: subAccount.id },
     update: subAccount,

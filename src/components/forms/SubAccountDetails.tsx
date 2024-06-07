@@ -3,9 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { v4 } from "uuid";
-
 import { Button } from "@/components/ui/button";
+import ObjectId from 'bson-objectid';
 import {
   Form,
   FormControl,
@@ -84,7 +83,7 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const response = await upsertSubAccount({
-        id: details?.id ? details.id : v4(),
+        id: details?.id ? details.id : new ObjectId().toHexString(),
         address: values.address,
         subAccountLogo: values.subAccountLogo,
         city: values.city,

@@ -47,7 +47,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import { v4 } from "uuid";
+import ObjectId from "bson-objectid";
 
 interface Props {
   data?: Partial<Agency>;
@@ -177,7 +177,7 @@ const AgencyDetails = ({ data }: Props) => {
       if (!data) return;
 
       const response = await upsertAgency({
-        id: data?.id ? data.id : v4(),
+        id: data?.id ? data.id : new ObjectId().toHexString(),
         // customerId: data?.customerId || custId || '',
         address: values.address,
         agencyLogo: values.agencyLogo,
