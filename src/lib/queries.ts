@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { Agency, Plan, SubAccount, User } from "@prisma/client";
 import { AArrowDown } from "lucide-react";
 import { isNull } from "util";
-import ObjectId from "bson-objectid";
+import { v4 } from "uuid";
 
 export const getAuthUserDetails = async () => {
   const user = await currentUser();
@@ -302,7 +302,7 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
     },
   });
   if (!agencyOwner) return console.log("🔴Error could not create subaccount");
-  const permissionId = new ObjectId().toHexString();
+  const permissionId = v4();
   const response = await db.subAccount.upsert({
     where: { id: subAccount.id },
     update: subAccount,
@@ -379,3 +379,50 @@ export const getUserPermissions = async (userId: string) => {
 
   return response;
 };
+
+export const updateUser = async (user: Partial<User>) => {
+  const response = await db.user.update({
+    where: { email: user.email },
+    data: { ...user },
+  });
+
+  await clerkClient.users.updateUserMetadata(response.id, {
+    privateMetadata: {
+      role: user.role || "SUBACCOUNT_USER",
+    },
+  });
+
+  return response;
+};
+
+export const changeUserPermissions = async (
+  permissionId: string | undefined,
+  userEmail: string,
+  subAccountId: string,
+  permission: boolean
+) => {
+  try {
+    const response = await db.permissions.upsert({
+      where: { id: permissionId },
+      update: { access: permission },
+      create: {
+        access: permission,
+        email: userEmail,
+        subAccountId: subAccountId,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.log("🔴Could not change persmission", error);
+  }
+};
+
+export const getSubaccountDetails = async (subaccountId: string) => {
+  const response = await db.subAccount.findUnique({
+    where: {
+      id: subaccountId,
+    },
+  })
+  return response
+}
+

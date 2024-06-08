@@ -47,7 +47,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import ObjectId from "bson-objectid";
+import { v4 } from "uuid";
 
 interface Props {
   data?: Partial<Agency>;
@@ -177,7 +177,7 @@ const AgencyDetails = ({ data }: Props) => {
       if (!data) return;
 
       const response = await upsertAgency({
-        id: data?.id ? data.id : new ObjectId().toHexString(),
+        id: data?.id ? data.id : v4(),
         // customerId: data?.customerId || custId || '',
         address: values.address,
         agencyLogo: values.agencyLogo,
@@ -446,12 +446,12 @@ const AgencyDetails = ({ data }: Props) => {
             </form>
           </Form>
           {data?.id && (
-            <div className="flex flex-row items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
+            <div className="flex flex-col items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
               <div>
                 <div>Danger Zone</div>
               </div>
               <div className="text-muted-foreground">
-                Deleting your agency cannpt be undone. This will also delete all
+                Deleting your agency cannot be undone. This will also delete all
                 sub accounts and all data related to your sub accounts. Sub
                 accounts will no longer have access to funnels, contacts etc.
               </div>
