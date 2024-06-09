@@ -29,10 +29,9 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import { Edit, MoreVertical, PlusCircleIcon, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction, useMemo } from "react";
-// import PipelineTicket from './pipeline-ticket'
 import CustomModal from "@/components/global/custom-modal";
 import TicketForm from "@/components/forms/ticket-form";
-import PipelineTicket from "./pipeline-ticket";
+// import PipelineTicket from "./pipeline-ticket";
 
 interface PipelaneLaneProps {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>;
@@ -181,14 +180,15 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
                           className="mt-2"
                         >
                           {tickets.map((ticket, index) => (
-                            <PipelineTicket
-                              allTickets={allTickets}
-                              setAllTickets={setAllTickets}
-                              subaccountId={subaccountId}
-                              ticket={ticket}
-                              key={ticket.id.toString()}
-                              index={index}
-                            />
+                            // <PipelineTicket
+                            //   allTickets={allTickets}
+                            //   setAllTickets={setAllTickets}
+                            //   subaccountId={subaccountId}
+                            //   ticket={ticket}
+                            //   key={ticket.id.toString()}
+                            //   index={index}
+                            // />
+                            <div key={ticket.id}></div>
                           ))}
                           {provided.placeholder}
                         </div>

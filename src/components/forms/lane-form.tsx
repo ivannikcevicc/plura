@@ -37,15 +37,12 @@ import { useModal } from "@/providers/modal-provider";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-interface CreateLaneFormProps {
+interface LaneFormProps {
   defaultData?: Lane;
   pipelineId: string;
 }
 
-const CreateLaneForm: React.FC<CreateLaneFormProps> = ({
-  defaultData,
-  pipelineId,
-}) => {
+const LaneForm: React.FC<LaneFormProps> = ({ defaultData, pipelineId }) => {
   const { setClose } = useModal();
   const router = useRouter();
   const form = useForm<z.infer<typeof LaneFormSchema>>({
@@ -136,4 +133,4 @@ const CreateLaneForm: React.FC<CreateLaneFormProps> = ({
   );
 };
 
-export default CreateLaneForm;
+export default LaneForm;

@@ -9,6 +9,7 @@ import {
   User,
 } from "@prisma/client";
 import {
+  _getTicketsWithAllRelations,
   // _getTicketsWithAllRelations,
   getAuthUserDetails,
   getMedia,
@@ -114,9 +115,9 @@ export const TicketFormSchema = z.object({
   }),
 });
 
-// export type TicketDetails = Prisma.PromiseReturnType<
-//   typeof _getTicketsWithAllRelations
-// >;
+export type TicketDetails = Prisma.PromiseReturnType<
+  typeof _getTicketsWithAllRelations
+>;
 
 export const ContactUserFormSchema = z.object({
   name: z.string().min(1, "Required"),
