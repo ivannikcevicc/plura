@@ -1,9 +1,23 @@
 "use client";
 import { Agency } from "@prisma/client";
-import { useEffect, useState } from "react";
-import { useToast } from "../ui/use-toast";
+import { useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { NumberInput } from "@tremor/react";
+import { v4 } from "uuid";
+
 import { useRouter } from "next/navigation";
-import { AlertDialog } from "@radix-ui/react-alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Card,
   CardContent,
@@ -20,14 +34,12 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import { useToast } from "../ui/use-toast";
+
 import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import FileUpload from "@/components/global/file-upload";
+import FileUpload from "../global/file-upload";
 import { Input } from "../ui/input";
 import { Switch } from "../ui/switch";
-import { Divide } from "lucide-react";
-import { NumberInput } from "@tremor/react";
 import {
   deleteAgency,
   initUser,
@@ -37,102 +49,51 @@ import {
 } from "@/lib/queries";
 import { Button } from "../ui/button";
 import Loading from "../global/loading";
-import {
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../ui/alert-dialog";
-import { v4 } from "uuid";
 
-interface Props {
+type Props = {
   data?: Partial<Agency>;
-}
+};
 
 const FormSchema = z.object({
-  name: z.string().min(2, "Agency name must be above 2 characters"),
-  companyEmail: z.string(),
+  name: z.string().min(2, { message: "Agency name must be atleast 2 chars." }),
+  companyEmail: z.string().min(1),
   companyPhone: z.string().min(1),
+  whiteLabel: z.boolean(),
   address: z.string().min(1),
   city: z.string().min(1),
   zipCode: z.string().min(1),
-  state: z.string().min(1).optional(),
+  state: z.string().min(1),
   country: z.string().min(1),
   agencyLogo: z.string().min(1),
-  whiteLabel: z.boolean(),
 });
 
 const AgencyDetails = ({ data }: Props) => {
   const { toast } = useToast();
   const router = useRouter();
-
+  const [deletingAgency, setDeletingAgency] = useState(false);
   const form = useForm<z.infer<typeof FormSchema>>({
+    mode: "onChange",
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: data?.name,
       companyEmail: data?.companyEmail,
       companyPhone: data?.companyPhone,
+      whiteLabel: data?.whiteLabel || false,
       address: data?.address,
       city: data?.city,
       zipCode: data?.zipCode,
       state: data?.state,
       country: data?.country,
       agencyLogo: data?.agencyLogo,
-      whiteLabel: data?.whiteLabel || false,
     },
   });
-  const [deletingAgency, setDeletingAgency] = useState(false);
+  const isLoading = form.formState.isSubmitting;
+
   useEffect(() => {
     if (data) {
       form.reset(data);
     }
   }, [data]);
-  const isLoading = form.formState.isSubmitting;
-  // const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
-  //   try {
-  //     let agencyId = data?.id;
-
-  //     if (!agencyId) {
-  //       const newUserData = await initUser({ role: "AGENCY_OWNER" });
-  //       agencyId = v4(); // Generate a new ID for the new agency
-  //     }
-
-  //     await upsertAgency({
-  //       id: agencyId,
-  //       address: values.address,
-  //       agencyLogo: values.agencyLogo,
-  //       city: values.city,
-  //       companyPhone: values.companyPhone,
-  //       country: values.country,
-  //       name: values.name,
-  //       state: values.state || "",
-  //       whiteLabel: values.whiteLabel,
-  //       zipCode: values.zipCode,
-  //       createdAt: new Date(),
-  //       updatedAt: new Date(),
-  //       companyEmail: values.companyEmail,
-  //       connectAccountId: "",
-  //       goal: 5,
-  //     });
-
-  //     toast({
-  //       title: "Created Agency",
-  //     });
-
-  //     router.push(`/agency/${agencyId}`);
-  //   } catch (error) {
-  //     console.log(error);
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Oops!",
-  //       description: "Could not create your agency",
-  //     });
-  //   }
-  // };
 
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
@@ -161,31 +122,31 @@ const AgencyDetails = ({ data }: Props) => {
           },
         };
 
-        // const customerResponse = await fetch('/api/stripe/create-customer', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify(bodyData),
-        // })
-        // const customerData: { customerId: string } =
-        //   await customerResponse.json()
-        // custId = customerData.customerId
+        const customerResponse = await fetch("/api/stripe/create-customer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyData),
+        });
+        const customerData: { customerId: string } =
+          await customerResponse.json();
+        custId = customerData.customerId;
       }
 
       newUserData = await initUser({ role: "AGENCY_OWNER" });
-      if (!data) return;
+      if (!data?.customerId && !custId) return;
 
       const response = await upsertAgency({
         id: data?.id ? data.id : v4(),
-        // customerId: data?.customerId || custId || '',
+        customerId: data?.customerId || custId || "",
         address: values.address,
         agencyLogo: values.agencyLogo,
         city: values.city,
         companyPhone: values.companyPhone,
         country: values.country,
         name: values.name,
-        state: values.state || "",
+        state: values.state,
         whiteLabel: values.whiteLabel,
         zipCode: values.zipCode,
         createdAt: new Date(),
@@ -210,7 +171,6 @@ const AgencyDetails = ({ data }: Props) => {
       });
     }
   };
-
   const handleDeleteAgency = async () => {
     if (!data?.id) return;
     setDeletingAgency(true);
@@ -239,20 +199,20 @@ const AgencyDetails = ({ data }: Props) => {
         <CardHeader>
           <CardTitle>Agency Information</CardTitle>
           <CardDescription>
-            Lets create an agency for your business. You can edit agency
-            settings later from the agency settings tab.
+            Lets create an agency for you business. You can edit agency settings
+            later from the agency settings tab.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form
-              className="space-y-4"
               onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4"
             >
               <FormField
-                name="agencyLogo"
-                control={form.control}
                 disabled={isLoading}
+                control={form.control}
+                name="agencyLogo"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Agency Logo</FormLabel>
@@ -276,21 +236,20 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Agency Name</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Your agency name" />
+                        <Input placeholder="Your agency name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  disabled={isLoading}
                   control={form.control}
                   name="companyEmail"
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel>Agency Email</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Your agency email" />
+                        <Input readOnly placeholder="Email" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -306,55 +265,54 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Agency Phone Number</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Phone" />
+                        <Input placeholder="Phone" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="flex md:flex-row gap-4">
-                <FormField
-                  disabled={isLoading}
-                  control={form.control}
-                  name="whiteLabel"
-                  render={({ field }) => (
+
+              <FormField
+                disabled={isLoading}
+                control={form.control}
+                name="whiteLabel"
+                render={({ field }) => {
+                  return (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border gap-4 p-4">
                       <div>
                         <FormLabel>Whitelabel Agency</FormLabel>
                         <FormDescription>
-                          Turning on whitelabel mode will show your agency logo
+                          Turning on whilelabel mode will show your agency logo
                           to all sub accounts by default. You can overwrite this
                           functionality through sub account settings.
                         </FormDescription>
                       </div>
+
                       <FormControl>
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                        ></Switch>
+                        />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
-                  )}
-                />
-              </div>
-              <div className="flex md:flex-row gap-4">
-                <FormField
-                  disabled={isLoading}
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Address</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="123 st..." />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                  );
+                }}
+              />
+              <FormField
+                disabled={isLoading}
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123 st..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="flex md:flex-row gap-4">
                 <FormField
                   disabled={isLoading}
@@ -364,7 +322,7 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>City</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="City" />
+                        <Input placeholder="City" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -378,7 +336,7 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>State</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="State" />
+                        <Input placeholder="State" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -390,31 +348,29 @@ const AgencyDetails = ({ data }: Props) => {
                   name="zipCode"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Zip Code</FormLabel>
+                      <FormLabel>Zipcpde</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Zip Code" />
+                        <Input placeholder="Zipcode" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="flex md:flex-row gap-4">
-                <FormField
-                  disabled={isLoading}
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Country" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                disabled={isLoading}
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Country</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Country" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {data?.id && (
                 <div className="flex flex-col gap-2">
                   <FormLabel>Create A Goal</FormLabel>
@@ -445,19 +401,20 @@ const AgencyDetails = ({ data }: Props) => {
               </Button>
             </form>
           </Form>
+
           {data?.id && (
-            <div className="flex flex-col items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
+            <div className="flex flex-row items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
               <div>
                 <div>Danger Zone</div>
               </div>
               <div className="text-muted-foreground">
-                Deleting your agency cannot be undone. This will also delete all
+                Deleting your agency cannpt be undone. This will also delete all
                 sub accounts and all data related to your sub accounts. Sub
                 accounts will no longer have access to funnels, contacts etc.
               </div>
               <AlertDialogTrigger
                 disabled={isLoading || deletingAgency}
-                className="text-red-600 p-2 text-center mt-2 rounded-md hover:bg-red-600 hover:text-white whitespace-nowrap"
+                className="text-red-600 p-2 text-center mt-2 rounded-md hove:bg-red-600 hover:text-white whitespace-nowrap"
               >
                 {deletingAgency ? "Deleting..." : "Delete Agency"}
               </AlertDialogTrigger>

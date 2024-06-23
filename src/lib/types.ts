@@ -10,15 +10,11 @@ import {
 } from "@prisma/client";
 import {
   _getTicketsWithAllRelations,
-  // _getTicketsWithAllRelations,
   getAuthUserDetails,
   getMedia,
   getPipelineDetails,
   getTicketsWithTags,
   // getFunnels,
-  // getMedia,
-  // getPipelineDetails,
-  // getTicketsWithTags,
   getUserPermissions,
 } from "./queries";
 import { db } from "./db";
