@@ -23,8 +23,6 @@ const FunnelSettings: React.FC<FunnelSettingsProps> = async ({
   subaccountId,
   defaultData,
 }) => {
-  //CHALLENGE: go connect your stripe to sell products
-
   const subaccountDetails = await db.subAccount.findUnique({
     where: {
       id: subaccountId,
@@ -32,7 +30,8 @@ const FunnelSettings: React.FC<FunnelSettingsProps> = async ({
   });
 
   if (!subaccountDetails) return;
-  if (!subaccountDetails.connectAccountId) return;
+  if (!subaccountDetails.connectAccountId)
+    return <div>Connect your stripe account to sell products.</div>;
   const products = await getConnectAccountProducts(
     subaccountDetails.connectAccountId
   );

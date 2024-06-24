@@ -108,8 +108,7 @@ const LaunchPad = async ({ params, searchParams }: Props) => {
                     used to run payouts.
                   </p>
                 </div>
-                <Button>Start</Button>
-                {/* {subaccountDetails.connectAccountId ||
+                {subaccountDetails.connectAccountId ||
                 connectedStripeAccount ? (
                   <CheckCircleIcon
                     size={50}
@@ -122,7 +121,7 @@ const LaunchPad = async ({ params, searchParams }: Props) => {
                   >
                     Start
                   </Link>
-                )} */}
+                )}
               </div>
               <div className="flex justify-between items-center w-full h-20 border p-4 rounded-lg">
                 <div className="flex items-center gap-4">
