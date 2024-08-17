@@ -60,7 +60,7 @@ const FunnelForm: React.FC<CreateFunnelProps> = ({
         subDomainName: defaultData.subDomainName || "",
       });
     }
-  }, [defaultData]);
+  }, [defaultData, form]);
 
   const isLoading = form.formState.isLoading;
 
