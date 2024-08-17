@@ -1,7 +1,6 @@
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -61,8 +60,6 @@ model User {
   Permissions  Permissions[]
   Ticket       Ticket[]
   Notification Notification[]
-
-  @@index([agencyId])
 }
 
 model Permissions {
@@ -72,9 +69,6 @@ model Permissions {
   subAccountId String
   SubAccount   SubAccount @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
   access       Boolean
-
-  @@index([subAccountId])
-  @@index([email])
 }
 
 model Agency {
@@ -130,8 +124,6 @@ model SubAccount {
   Pipeline         Pipeline[]
   Tags             Tag[]
   Notification     Notification[]
-
-  @@index([agencyId])
 }
 
 model Tag {
@@ -141,11 +133,8 @@ model Tag {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   subAccountId String
-
-  SubAccount SubAccount @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
-  Ticket     Ticket[]
-
-  @@index([subAccountId])
+  SubAccount   SubAccount @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
+  Ticket       Ticket[]
 }
 
 model Pipeline {
@@ -156,8 +145,6 @@ model Pipeline {
   Lane         Lane[]
   SubAccount   SubAccount @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
   subAccountId String
-
-  @@index([subAccountId])
 }
 
 model Lane {
@@ -169,31 +156,23 @@ model Lane {
   pipelineId String
   Tickets    Ticket[]
   order      Int      @default(0)
-
-  @@index([pipelineId])
 }
 
 model Ticket {
-  id          String   @id @default(uuid())
-  name        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  laneId      String
-  order       Int      @default(0)
-  Lane        Lane     @relation(fields: [laneId], references: [id], onDelete: Cascade)
-  value       Decimal?
-  description String?
-  Tags        Tag[]
-
-  customerId String?
-  Customer   Contact? @relation(fields: [customerId], references: [id], onDelete: SetNull)
-
+  id             String   @id @default(uuid())
+  name           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  laneId         String
+  order          Int      @default(0)
+  Lane           Lane     @relation(fields: [laneId], references: [id], onDelete: Cascade)
+  value          Float?
+  description    String?
+  Tags           Tag[]
+  customerId     String?
+  Customer       Contact? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   assignedUserId String?
-  Assigned       User?   @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
-
-  @@index([laneId])
-  @@index([customerId])
-  @@index([assignedUserId])
+  Assigned       User?    @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
 }
 
 enum TriggerTypes {
@@ -209,8 +188,6 @@ model Trigger {
   subAccountId String
   Subaccount   SubAccount   @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
   Automations  Automation[]
-
-  @@index([subAccountId])
 }
 
 model Automation {
@@ -225,9 +202,6 @@ model Automation {
   Subaccount         SubAccount           @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
   Action             Action[]
   AutomationInstance AutomationInstance[]
-
-  @@index([triggerId])
-  @@index([subAccountId])
 }
 
 model AutomationInstance {
@@ -237,8 +211,6 @@ model AutomationInstance {
   automationId String
   Automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
   active       Boolean    @default(false)
-
-  @@index([automationId])
 }
 
 enum ActionType {
@@ -255,8 +227,6 @@ model Action {
   order        Int
   Automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
   laneId       String     @default("0")
-
-  @@index([automationId])
 }
 
 model Contact {
@@ -266,11 +236,8 @@ model Contact {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   subAccountId String
-
-  Subaccount SubAccount @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
-  Ticket     Ticket[]
-
-  @@index([subAccountId])
+  Subaccount   SubAccount @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
+  Ticket       Ticket[]
 }
 
 model Media {
@@ -282,8 +249,6 @@ model Media {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   Subaccount   SubAccount @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
-
-  @@index([subAccountId])
 }
 
 model Funnel {
@@ -300,8 +265,6 @@ model Funnel {
   FunnelPages   FunnelPage[]
   liveProducts  String?      @default("[]")
   ClassName     ClassName[]
-
-  @@index([subAccountId])
 }
 
 model ClassName {
@@ -311,10 +274,8 @@ model ClassName {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   funnelId   String
-  customData String?  @db.LongText
+  customData String?  @db.Text
   Funnel     Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
-
-  @@index([funnelId])
 }
 
 model FunnelPage {
@@ -324,13 +285,11 @@ model FunnelPage {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   visits       Int      @default(0)
-  content      String?  @db.LongText
+  content      String?  @db.Text
   order        Int
   previewImage String?  @db.Text
   funnelId     String
   Funnel       Funnel   @relation(fields: [funnelId], references: [id], onDelete: Cascade)
-
-  @@index([funnelId])
 }
 
 model AgencySidebarOption {
@@ -342,8 +301,6 @@ model AgencySidebarOption {
   Agency    Agency?  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([agencyId])
 }
 
 model SubAccountSidebarOption {
@@ -355,8 +312,6 @@ model SubAccountSidebarOption {
   updatedAt    DateTime    @updatedAt
   SubAccount   SubAccount? @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
   subAccountId String?
-
-  @@index([subAccountId])
 }
 
 enum InvitationStatus {
@@ -372,27 +327,19 @@ model Invitation {
   Agency   Agency           @relation(fields: [agencyId], references: [id], onDelete: Cascade)
   status   InvitationStatus @default(PENDING)
   role     Role             @default(SUBACCOUNT_USER)
-
-  @@index([agencyId])
 }
 
 model Notification {
-  id           String  @id @default(uuid())
+  id           String     @id @default(uuid())
   notification String
   agencyId     String
   subAccountId String?
   userId       String
-
-  User       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Agency     Agency      @relation(fields: [agencyId], references: [id], onDelete: Cascade)
-  SubAccount SubAccount? @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([agencyId])
-  @@index([subAccountId])
-  @@index([userId])
+  User         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Agency       Agency     @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  SubAccount   SubAccount? @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 enum Plan {
@@ -401,22 +348,18 @@ enum Plan {
 }
 
 model Subscription {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  plan      Plan?
-  price     String?
-  active    Boolean  @default(false)
-
-  priceId              String
-  customerId           String
-  currentPeriodEndDate DateTime
-  subscritiptionId     String   @unique
-
-  agencyId String? @unique
-  Agency   Agency? @relation(fields: [agencyId], references: [id])
-
-  @@index([customerId])
+  id                    String   @id @default(uuid())
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  plan                  Plan?
+  price                 String?
+  active                Boolean  @default(false)
+  priceId               String
+  customerId            String
+  currentPeriodEndDate  DateTime
+  subscritiptionId      String   @unique
+  agencyId              String?  @unique
+  Agency                Agency?  @relation(fields: [agencyId], references: [id])
 }
 
 model AddOns {
@@ -428,6 +371,4 @@ model AddOns {
   priceId   String   @unique
   agencyId  String?
   Agency    Agency?  @relation(fields: [agencyId], references: [id])
-
-  @@index([agencyId])
 }
