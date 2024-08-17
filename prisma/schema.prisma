@@ -166,7 +166,7 @@ model Ticket {
   laneId         String
   order          Int      @default(0)
   Lane           Lane     @relation(fields: [laneId], references: [id], onDelete: Cascade)
-  value          Float?
+  value          Decimal?
   description    String?
   Tags           Tag[]
   customerId     String?
